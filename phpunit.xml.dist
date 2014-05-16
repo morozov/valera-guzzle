@@ -6,4 +6,9 @@
             <directory>tests/Valera/Tests/Loader</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist>
+            <directory>src</directory>
+        </whitelist>
+    </filter>
 </phpunit>
