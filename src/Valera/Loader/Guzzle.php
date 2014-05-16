@@ -38,11 +38,13 @@ class Guzzle implements LoaderInterface
             $message = $response->getStatusCode();
             $result->fail($message);
         } else {
+            $contentType = $response->getHeader('Content-Type');
+            if ($contentType) {
+                $contentType = (string) $contentType;
+            }
+
             $body = $response->getBody(true);
-            $result->setContent(
-                $body,
-                $response->getHeader('Content-Type')
-            );
+            $result->setContent($body, $contentType);
         }
     }
 }
