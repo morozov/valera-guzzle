@@ -3,7 +3,6 @@
 namespace Valera\Tests;
 
 use Valera\Loader;
-use Valera\Tests\Value\Helper;
 
 /**
  * @covers \Valera\Loader\Guzzle
@@ -14,16 +13,14 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
     {
         $response = $this->getResponseMock(false);
         $result = $this->getResultMock('setContent');
-        $source = Helper::getSource();
-        $this->callProcessResponse($response, $result, $source);
+        $this->callProcessResponse($response, $result);
     }
 
     public function testFailedResponse()
     {
         $response = $this->getResponseMock(true);
         $result = $this->getResultMock('fail');
-        $source = Helper::getSource();
-        $this->callProcessResponse($response, $result, $source);
+        $this->callProcessResponse($response, $result);
     }
 
     private function getResponseMock($isError)
@@ -50,7 +47,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
         return $result;
     }
 
-    private function callProcessResponse($response, $result, $source)
+    private function callProcessResponse($response, $result)
     {
         $loader = $this->getMockBuilder('Valera\\Loader\\Guzzle')
             ->disableOriginalConstructor()
@@ -58,6 +55,6 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
             ->getMock();
         $re = new \ReflectionMethod($loader, 'processResponse');
         $re->setAccessible(true);
-        $re->invoke($loader, $response, $result, $source);
+        $re->invoke($loader, $response, $result);
     }
 }

@@ -27,7 +27,7 @@ class Guzzle implements LoaderInterface
         return $this->httpClient->createRequest(
             $resource->getMethod(),
             $resource->getUrl(),
-            $resource->getHeaders(),
+            $this->getHeaders($resource),
             $resource->getData()
         )->send();
     }
@@ -46,5 +46,20 @@ class Guzzle implements LoaderInterface
             $body = $response->getBody(true);
             $result->setContent($body, $contentType);
         }
+    }
+
+    /**
+     * Returns request headers. The Referer header is first taken from headers, and if not found
+     * then referrer resource property is used
+     *
+     * @param \Valera\Resource $resource
+     *
+     * @return array
+     */
+    protected function getHeaders(Resource $resource)
+    {
+        return array_merge(array_filter(array(
+            'referer' => $resource->getReferrer(),
+        )), $resource->getHeaders());
     }
 }
