@@ -9,9 +9,32 @@ use Valera\Resource;
 
 class Guzzle implements LoaderInterface
 {
+    /**
+     * @var \Guzzle\Http\ClientInterface
+     */
     protected $httpClient;
 
     public function __construct(ClientInterface $httpClient)
+    {
+        $this->setHttpClient($httpClient);
+    }
+
+    /**
+     * Returns underlying HTTP client implementation
+     *
+     * @return \Guzzle\Http\ClientInterface
+     */
+    public function getHttpClient()
+    {
+        return $this->httpClient;
+    }
+
+    /**
+     * Sets underlying HTTP client implementation
+     *
+     * @param \Guzzle\Http\ClientInterface $httpClient
+     */
+    public function setHttpClient(ClientInterface $httpClient)
     {
         $this->httpClient = $httpClient;
     }
@@ -28,7 +51,7 @@ class Guzzle implements LoaderInterface
             $resource->getMethod(),
             $resource->getUrl(),
             $this->getHeaders($resource),
-            $resource->getData()
+            $resource->getPayload()
         )->send();
     }
 

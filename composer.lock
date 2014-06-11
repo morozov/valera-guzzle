@@ -318,12 +318,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/morozov/valera.git",
-                "reference": "2a0edf2e1534bcbe8735fe3751ec0c0d148dc35d"
+                "reference": "ac5fd4a5a0e208e3476d3b8e0b3975ceca330669"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/morozov/valera/zipball/2a0edf2e1534bcbe8735fe3751ec0c0d148dc35d",
-                "reference": "2a0edf2e1534bcbe8735fe3751ec0c0d148dc35d",
+                "url": "https://api.github.com/repos/morozov/valera/zipball/ac5fd4a5a0e208e3476d3b8e0b3975ceca330669",
+                "reference": "ac5fd4a5a0e208e3476d3b8e0b3975ceca330669",
                 "shasum": ""
             },
             "require": {
@@ -357,7 +357,7 @@
                 }
             ],
             "description": "Valera, the parser engine",
-            "time": "2014-06-08 07:18:17"
+            "time": "2014-06-09 19:19:38"
         }
     ],
     "packages-dev": [

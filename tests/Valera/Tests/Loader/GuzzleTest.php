@@ -3,6 +3,7 @@
 namespace Valera\Tests;
 
 use Valera\Loader;
+use Valera\Tests\Value\Helper;
 
 /**
  * @covers \Valera\Loader\Guzzle
@@ -13,6 +14,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
     {
         $response = $this->getResponseMock(false);
         $result = $this->getResultMock('setContent');
+        $source = Helper::getDocumentSource();
         $this->callProcessResponse($response, $result);
     }
 
@@ -20,6 +22,7 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
     {
         $response = $this->getResponseMock(true);
         $result = $this->getResultMock('fail');
+        $source = Helper::getDocumentSource();
         $this->callProcessResponse($response, $result);
     }
 
