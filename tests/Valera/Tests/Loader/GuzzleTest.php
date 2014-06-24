@@ -3,7 +3,6 @@
 namespace Valera\Tests;
 
 use Valera\Loader;
-use Valera\Tests\Value\Helper;
 
 /**
  * @covers \Valera\Loader\Guzzle
@@ -12,29 +11,27 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 {
     public function testSuccessResponse()
     {
-        $response = $this->getResponseMock(false);
+        $response = $this->getResponseMock(200);
         $result = $this->getResultMock('setContent');
-        $source = Helper::getDocumentSource();
         $this->callProcessResponse($response, $result);
     }
 
     public function testFailedResponse()
     {
-        $response = $this->getResponseMock(true);
+        $response = $this->getResponseMock(404);
         $result = $this->getResultMock('fail');
-        $source = Helper::getDocumentSource();
         $this->callProcessResponse($response, $result);
     }
 
-    private function getResponseMock($isError)
+    private function getResponseMock($statusCode)
     {
-        $response = $this->getMockBuilder('Guzzle\\Http\\Message\\Response')
+        $response = $this->getMockBuilder('GuzzleHttp\\Message\\Response')
             ->disableOriginalConstructor()
-            ->setMethods(array('isError'))
+            ->setMethods(array('getStatusCode'))
             ->getMock();
         $response->expects($this->any())
-            ->method('isError')
-            ->will($this->returnValue($isError));
+            ->method('getStatusCode')
+            ->will($this->returnValue($statusCode));
 
         return $response;
     }

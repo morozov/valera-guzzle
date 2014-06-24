@@ -2,15 +2,15 @@
 
 namespace Valera\Loader;
 
-use Guzzle\Http\ClientInterface;
-use Guzzle\Http\Message\Response;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Message\ResponseInterface;
 use Valera\Loader\Result as LoaderResult;
 use Valera\Resource;
 
 class Guzzle implements LoaderInterface
 {
     /**
-     * @var \Guzzle\Http\ClientInterface
+     * @var \GuzzleHttp\ClientInterface
      */
     protected $httpClient;
 
@@ -22,7 +22,7 @@ class Guzzle implements LoaderInterface
     /**
      * Returns underlying HTTP client implementation
      *
-     * @return \Guzzle\Http\ClientInterface
+     * @return \GuzzleHttp\ClientInterface
      */
     public function getHttpClient()
     {
@@ -32,7 +32,7 @@ class Guzzle implements LoaderInterface
     /**
      * Sets underlying HTTP client implementation
      *
-     * @param \Guzzle\Http\ClientInterface $httpClient
+     * @param \GuzzleHttp\ClientInterface $httpClient
      */
     public function setHttpClient(ClientInterface $httpClient)
     {
@@ -47,17 +47,22 @@ class Guzzle implements LoaderInterface
 
     protected function sendRequest(Resource $resource)
     {
-        return $this->httpClient->createRequest(
+        $request = $this->httpClient->createRequest(
             $resource->getMethod(),
             $resource->getUrl(),
-            $this->getHeaders($resource),
-            $resource->getPayload()
-        )->send();
+            array(
+                'headers' => $this->getHeaders($resource),
+                'body' => $resource->getPayload(),
+            )
+        );
+
+        return $this->httpClient->send($request);
     }
 
-    protected function processResponse(Response $response, LoaderResult $result)
+    protected function processResponse(ResponseInterface $response, LoaderResult $result)
     {
-        if ($response->isError()) {
+        $code = (string) $response->getStatusCode();
+        if ($code[0] !== '2') {
             $message = $response->getStatusCode();
             $result->fail($message);
         } else {
@@ -66,7 +71,7 @@ class Guzzle implements LoaderInterface
                 $contentType = (string) $contentType;
             }
 
-            $body = $response->getBody(true);
+            $body = (string) $response->getBody();
             $result->setContent($body, $contentType);
         }
     }
