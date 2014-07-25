@@ -3,6 +3,7 @@
 namespace Valera\Loader;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Message\ResponseInterface;
 use Valera\Loader\Result as LoaderResult;
 use Valera\Resource;
@@ -41,8 +42,12 @@ class Guzzle implements LoaderInterface
 
     public function load(Resource $resource, LoaderResult $result)
     {
-        $response = $this->sendRequest($resource);
-        $this->processResponse($response, $result);
+        try {
+            $response = $this->sendRequest($resource);
+            $this->processResponse($response, $result);
+        } catch (RequestException $e) {
+            $this->processFailure($e, $result);
+        }
     }
 
     protected function sendRequest(Resource $resource)
@@ -61,19 +66,19 @@ class Guzzle implements LoaderInterface
 
     protected function processResponse(ResponseInterface $response, LoaderResult $result)
     {
-        $code = (string) $response->getStatusCode();
-        if ($code[0] !== '2') {
-            $message = $response->getStatusCode();
-            $result->fail($message);
-        } else {
-            $contentType = $response->getHeader('Content-Type');
-            if ($contentType) {
-                $contentType = (string) $contentType;
-            }
-
-            $body = (string) $response->getBody();
-            $result->setContent($body, $contentType);
+        $contentType = $response->getHeader('Content-Type');
+        if ($contentType) {
+            $contentType = (string) $contentType;
         }
+
+        $body = (string) $response->getBody();
+        $result->setContent($body, $contentType);
+    }
+
+    protected function processFailure(RequestException $e, LoaderResult $result)
+    {
+        $message = $e->getMessage();
+        $result->fail($message);
     }
 
     /**

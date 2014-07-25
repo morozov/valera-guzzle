@@ -2,7 +2,9 @@
 
 namespace Valera\Tests;
 
-use Valera\Loader;
+use GuzzleHttp\Exception\RequestException;
+use Valera\Loader\Guzzle as Loader;
+use Valera\Tests\Value\Helper;
 
 /**
  * @covers \Valera\Loader\Guzzle
@@ -11,50 +13,67 @@ class LoaderTest extends \PHPUnit_Framework_TestCase
 {
     public function testSuccessResponse()
     {
-        $response = $this->getResponseMock(200);
-        $result = $this->getResultMock('setContent');
-        $this->callProcessResponse($response, $result);
-    }
+        /** @var \GuzzleHttp\Message\ResponseInterface|\PHPUnit_Framework_MockObject_MockObject $response */
+        $response = $this->getMock('GuzzleHttp\\Message\\ResponseInterface');
+        $response->expects($this->once())
+            ->method('getHeader')
+            ->will($this->returnValue('X-PHPUnit'));
+        $response->expects($this->once())
+            ->method('getBody')
+            ->will($this->returnValue('Hello, world!'));
 
-    public function testFailedResponse()
-    {
-        $response = $this->getResponseMock(404);
-        $result = $this->getResultMock('fail');
-        $this->callProcessResponse($response, $result);
-    }
+        $loader = $this->getLoader();
+        $loader->expects($this->any())
+            ->method('sendRequest')
+            ->will($this->returnValue($response));
 
-    private function getResponseMock($statusCode)
-    {
-        $response = $this->getMockBuilder('GuzzleHttp\\Message\\Response')
-            ->disableOriginalConstructor()
-            ->setMethods(array('getStatusCode'))
-            ->getMock();
-        $response->expects($this->any())
-            ->method('getStatusCode')
-            ->will($this->returnValue($statusCode));
-
-        return $response;
-    }
-
-    private function getResultMock($expectedMethod)
-    {
+        /** @var \Valera\Loader\Result|\PHPUnit_Framework_MockObject_MockObject $result */
         $result = $this->getMockBuilder('Valera\\Loader\\Result')
             ->disableOriginalConstructor()
             ->getMock();
         $result->expects($this->once())
-            ->method($expectedMethod);
+            ->method('setContent')
+            ->with('Hello, world!', 'X-PHPUnit');
 
-        return $result;
+        $this->load($loader, $result);
     }
 
-    private function callProcessResponse($response, $result)
+    public function testFailedResponse()
     {
-        $loader = $this->getMockBuilder('Valera\\Loader\\Guzzle')
+        /** @var \GuzzleHttp\Message\RequestInterface $request */
+        $request = $this->getMock('GuzzleHttp\\Message\\RequestInterface');
+        $e = new RequestException('Oops...', $request);
+
+        $loader = $this->getLoader();
+        $loader->expects($this->any())
+            ->method('sendRequest')
+            ->will($this->throwException($e));
+
+        /** @var \Valera\Loader\Result|\PHPUnit_Framework_MockObject_MockObject $result */
+        $result = $this->getMockBuilder('Valera\\Loader\\Result')
             ->disableOriginalConstructor()
-            ->setMethods(array())
             ->getMock();
-        $re = new \ReflectionMethod($loader, 'processResponse');
-        $re->setAccessible(true);
-        $re->invoke($loader, $response, $result);
+        $result->expects($this->once())
+            ->method('fail')
+            ->with('Oops...');
+
+        $this->load($loader, $result);
+    }
+
+    /**
+     * @return \Valera\Loader\Guzzle|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private function getLoader()
+    {
+        return $this->getMockBuilder('Valera\\Loader\\Guzzle')
+            ->disableOriginalConstructor()
+            ->setMethods(array('sendRequest'))
+            ->getMock();
+    }
+
+    private function load(Loader $loader, $result)
+    {
+        $resource = Helper::getResource();
+        $loader->load($resource, $result);
     }
 }
